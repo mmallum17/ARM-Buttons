@@ -41,7 +41,7 @@
 #include "stm32l1xx_hal.h"
 
 /* USER CODE BEGIN Includes */
-
+#include "ra6963.h"
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
@@ -91,7 +91,10 @@ int main(void)
   MX_GPIO_Init();
 
   /* USER CODE BEGIN 2 */
-
+  ra6963Init();
+  ra6963ClearGraphic();
+  ra6963ClearText();
+  ra6963ClearCG();
   /* USER CODE END 2 */
 
   /* Infinite loop */
