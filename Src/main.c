@@ -273,9 +273,18 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	ra6963ClearText();
-	ra6963TextGoTo(0, 0);
-	ra6963WriteString("Button Pressed");
+	if(GPIO_Pin == GPIO_PIN_5)
+	{
+		ra6963ClearText();
+		ra6963TextGoTo(0, 0);
+		ra6963WriteString("1st Row Button Pressed");
+	}
+	else if(GPIO_Pin == GPIO_PIN_6)
+	{
+		ra6963ClearText();
+		ra6963TextGoTo(0, 0);
+		ra6963WriteString("2nd Row Button Pressed");
+	}
 }
 /* USER CODE END 4 */
 
