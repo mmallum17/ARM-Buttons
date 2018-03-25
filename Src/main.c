@@ -48,6 +48,7 @@
 const char* rowOneStrings[12] = {"ZERO", "UNITS", "MENU", "UP", "DISPLAY TARE", "TARE", "ENTER", "RIGHT", "LEFT", "CALIBRATE", "DOWN", "GROSS/NET"};
 const char* rowTwoStrings[12] = {"3", "2", "1", "5", "6", "4", "8", "9", "7", ".", "0", "DELETE"};
 void (*setCol[12])(void);
+int count = 0;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
@@ -122,6 +123,7 @@ int main(void)
   ra6963ClearGraphic();
   ra6963ClearText();
   ra6963ClearCG();
+  ra6963TextGoTo(0, 0);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -292,37 +294,66 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(EXTI9_5_IRQn, 1, 1);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
 
 }
 
 /* USER CODE BEGIN 4 */
+void delay(uint32_t milliseconds) {
+   /* Initially clear flag */
+   (void) SysTick->CTRL;
+   while (milliseconds != 0) {
+      /* COUNTFLAG returns 1 if timer counted to 0 since the last flag read */
+      milliseconds -= (SysTick->CTRL & SysTick_CTRL_COUNTFLAG_Msk) >> SysTick_CTRL_COUNTFLAG_Pos;
+   }
+}
+
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
 	uint8_t col;
-	//HAL_Delay(20);
+	char display[30];
+	delay(50);
+	/*for(int i = 1000000; i > 0; i--)
+	{
+		for(int j = 1000000; j > 0; j--)
+		{
+			for(int k = 1000000; k > 0; k--)
+			{
+
+			}
+		}
+	}*/
 	if(GPIO_Pin == GPIO_PIN_5)
 	{
 		col = getCol(1);
 		if(col >= 1 && col <= 12)
 		{
 			ra6963ClearText();
+			count++;
 			ra6963TextGoTo(0, 0);
-			ra6963WriteString(rowOneStrings[col - 1]);
+			sprintf(display, "%d", count);
+			//ra6963WriteString(rowOneStrings[col - 1]);
+			ra6963WriteString(display);
 		}
+		setAllCols();
+		while(readRow(1));
 	}
 	else if(GPIO_Pin == GPIO_PIN_6)
 	{
 		col = getCol(2);
 		if(col >= 1 && col <= 12)
 		{
+			count++;
 			ra6963ClearText();
 			ra6963TextGoTo(0, 0);
-			ra6963WriteString(rowTwoStrings[col - 1]);
+			sprintf(display, "%d", count);
+			//ra6963WriteString(rowTwoStrings[col - 1]);
+			ra6963WriteString(display);
 		}
+		setAllCols();
+		while(readRow(2));
 	}
-	setAllCols();
 }
 
 uint8_t getCol(uint8_t row)
@@ -462,14 +493,8 @@ void setAllCols()
 	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOC, COL_9_Pin|COL_4_Pin|COL_3_Pin|COL_2_Pin
 	                        |COL_1_Pin, GPIO_PIN_SET);
-
-	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(COL_5_GPIO_Port, COL_5_Pin, GPIO_PIN_SET);
-
-	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOA, COL_7_Pin|COL_6_Pin, GPIO_PIN_SET);
-
-	/*Configure GPIO pin Output Level */
 	HAL_GPIO_WritePin(GPIOB, COL_8_Pin|COL_12_Pin|COL_11_Pin|COL_10_Pin, GPIO_PIN_SET);
 }
 
