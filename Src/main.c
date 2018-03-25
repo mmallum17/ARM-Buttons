@@ -45,8 +45,9 @@
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
-const char* rowOneStrings[12] = {"ZERO", "UNITS", "MENU", "UP", "DISPLAY TARE", "TARE", "ENTER", "RIGHT", "LEFT", "CALIBRATE", "DOWN", "GROSS/NET"};
-const char* rowTwoStrings[12] = {"3", "2", "1", "5", "6", "4", "8", "9", "7", ".", "0", "DELETE"};
+//const char* rowOneStrings[12] = {"ZERO", "UNITS", "MENU", "UP", "DISPLAY TARE", "TARE", "ENTER", "RIGHT", "LEFT", "CALIBRATE", "DOWN", "GROSS/NET"};
+//const char* rowTwoStrings[12] = {"3", "2", "1", "5", "6", "4", "8", "9", "7", ".", "0", "DELETE"};
+const char* buttonStrings[24] = {"ZERO", "UNITS", "MENU", "UP", "DISPLAY TARE", "TARE", "ENTER", "RIGHT", "LEFT", "CALIBRATE", "DOWN", "GROSS/NET", "3", "2", "1", "5", "6", "4", "8", "9", "7", ".", "0", "DELETE"};
 void (*setCol[12])(void);
 int count = 0;
 /* USER CODE BEGIN PV */
@@ -60,6 +61,8 @@ static void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
+uint8_t getKey();
+void delay(uint32_t milliseconds);
 uint8_t getCol(uint8_t row);
 uint8_t readRow(uint8_t row);
 void setColOne();
@@ -300,7 +303,44 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void delay(uint32_t milliseconds) {
+uint8_t getKey()
+{
+	uint8_t key;
+
+	// Wait till all keys are released
+	setAllCols();
+	while(readRow(1) || readRow(2));
+
+	// Wait for key to be pressed
+	do
+	{
+		while(!readRow(1) && !readRow(2));
+		delay(20);
+	}while(!readRow(1) && !readRow(2));
+
+	// Get Key
+	if(readRow(1))
+	{
+		key = getCol(1) - 1;
+	}
+	else if(readRow(2))
+	{
+		key = 11 + getCol(2);
+	}
+	else
+	{
+		key = -1;
+	}
+
+	// Wait till all keys are released
+	setAllCols();
+	while(readRow(1) || readRow(2));
+
+	return key;
+}
+
+void delay(uint32_t milliseconds)
+{
    /* Initially clear flag */
    (void) SysTick->CTRL;
    while (milliseconds != 0) {
@@ -311,6 +351,7 @@ void delay(uint32_t milliseconds) {
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+	uint8_t key;
 	uint8_t col;
 	char display[30];
 	delay(50);
@@ -331,10 +372,14 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		{
 			ra6963ClearText();
 			count++;
-			ra6963TextGoTo(0, 0);
+			ra6963TextGoTo(count, 0);
 			sprintf(display, "%d", count);
 			//ra6963WriteString(rowOneStrings[col - 1]);
 			ra6963WriteString(display);
+			key = getKey();
+			ra6963TextGoTo(count, 1);
+			//sprintf(display, "%d", key);
+			ra6963WriteString(buttonStrings[key]);
 		}
 		setAllCols();
 		while(readRow(1));
@@ -346,10 +391,13 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 		{
 			count++;
 			ra6963ClearText();
-			ra6963TextGoTo(0, 0);
+			ra6963TextGoTo(count, 0);
 			sprintf(display, "%d", count);
 			//ra6963WriteString(rowTwoStrings[col - 1]);
 			ra6963WriteString(display);
+			key = getKey();
+			ra6963TextGoTo(count, 1);
+			ra6963WriteString(buttonStrings[key]);
 		}
 		setAllCols();
 		while(readRow(2));
