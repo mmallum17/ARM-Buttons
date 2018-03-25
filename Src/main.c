@@ -45,7 +45,9 @@
 /* USER CODE END Includes */
 
 /* Private variables ---------------------------------------------------------*/
-
+const char* rowOneStrings[12] = {"ZERO", "UNITS", "MENU", "UP", "DISPLAY TARE", "TARE", "ENTER", "RIGHT", "LEFT", "CALIBRATE", "DOWN", "GROSS/NET"};
+const char* rowTwoStrings[12] = {"3", "2", "1", "5", "6", "4", "8", "9", "7", ".", "0", "DELETE"};
+void (*setCol[12])(void);
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 
@@ -57,7 +59,21 @@ static void MX_GPIO_Init(void);
 
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
-
+uint8_t getCol(uint8_t row);
+uint8_t readRow(uint8_t row);
+void setColOne();
+void setColTwo();
+void setColThree();
+void setColFour();
+void setColFive();
+void setColSix();
+void setColSeven();
+void setColEight();
+void setColNine();
+void setColTen();
+void setColEleven();
+void setColTwelve();
+void setAllCols();
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
@@ -68,7 +84,18 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+  setCol[0] = setColOne;
+  setCol[1] = setColTwo;
+  setCol[2] = setColThree;
+  setCol[3] = setColFour;
+  setCol[4] = setColFive;
+  setCol[5] = setColSix;
+  setCol[6] = setColSeven;
+  setCol[7] = setColEight;
+  setCol[8] = setColNine;
+  setCol[9] = setColTen;
+  setCol[10] = setColEleven;
+  setCol[11] = setColTwelve;
   /* USER CODE END 1 */
 
   /* MCU Configuration----------------------------------------------------------*/
@@ -273,18 +300,194 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
+	uint8_t col;
+	//HAL_Delay(20);
 	if(GPIO_Pin == GPIO_PIN_5)
 	{
-		ra6963ClearText();
-		ra6963TextGoTo(0, 0);
-		ra6963WriteString("1st Row Button Pressed");
+		col = getCol(1);
+		if(col >= 1 && col <= 12)
+		{
+			ra6963ClearText();
+			ra6963TextGoTo(0, 0);
+			ra6963WriteString(rowOneStrings[col - 1]);
+		}
 	}
 	else if(GPIO_Pin == GPIO_PIN_6)
 	{
-		ra6963ClearText();
-		ra6963TextGoTo(0, 0);
-		ra6963WriteString("2nd Row Button Pressed");
+		col = getCol(2);
+		if(col >= 1 && col <= 12)
+		{
+			ra6963ClearText();
+			ra6963TextGoTo(0, 0);
+			ra6963WriteString(rowTwoStrings[col - 1]);
+		}
 	}
+	setAllCols();
+}
+
+uint8_t getCol(uint8_t row)
+{
+	for(int i = 0; i < 12; i++)
+	{
+		(*setCol[i])();
+		if(readRow(row))
+		{
+			return i + 1;
+		}
+	}
+	return -1;
+}
+
+void setColOne()
+{
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOC, COL_1_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, COL_9_Pin|COL_4_Pin|COL_3_Pin|COL_2_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(COL_5_GPIO_Port, COL_5_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, COL_7_Pin|COL_6_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, COL_8_Pin|COL_12_Pin|COL_11_Pin|COL_10_Pin, GPIO_PIN_RESET);
+}
+
+void setColTwo()
+{
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOC, COL_2_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, COL_9_Pin|COL_4_Pin|COL_3_Pin|COL_1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(COL_5_GPIO_Port, COL_5_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, COL_7_Pin|COL_6_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, COL_8_Pin|COL_12_Pin|COL_11_Pin|COL_10_Pin, GPIO_PIN_RESET);
+}
+
+void setColThree()
+{
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOC, COL_3_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, COL_9_Pin|COL_4_Pin|COL_1_Pin|COL_2_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(COL_5_GPIO_Port, COL_5_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, COL_7_Pin|COL_6_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, COL_8_Pin|COL_12_Pin|COL_11_Pin|COL_10_Pin, GPIO_PIN_RESET);
+}
+
+void setColFour()
+{
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOC, COL_4_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, COL_9_Pin|COL_1_Pin|COL_3_Pin|COL_2_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(COL_5_GPIO_Port, COL_5_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, COL_7_Pin|COL_6_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, COL_8_Pin|COL_12_Pin|COL_11_Pin|COL_10_Pin, GPIO_PIN_RESET);
+}
+
+void setColFive()
+{
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(COL_5_GPIO_Port, COL_5_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, COL_9_Pin|COL_4_Pin|COL_3_Pin|COL_2_Pin|COL_1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, COL_7_Pin|COL_6_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, COL_8_Pin|COL_12_Pin|COL_11_Pin|COL_10_Pin, GPIO_PIN_RESET);
+}
+
+void setColSix()
+{
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOA, COL_6_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, COL_9_Pin|COL_4_Pin|COL_3_Pin|COL_2_Pin|COL_1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(COL_5_GPIO_Port, COL_5_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, COL_7_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, COL_8_Pin|COL_12_Pin|COL_11_Pin|COL_10_Pin, GPIO_PIN_RESET);
+}
+
+void setColSeven()
+{
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOA, COL_7_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, COL_9_Pin|COL_4_Pin|COL_3_Pin|COL_2_Pin|COL_1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(COL_5_GPIO_Port, COL_5_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, COL_6_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, COL_8_Pin|COL_12_Pin|COL_11_Pin|COL_10_Pin, GPIO_PIN_RESET);
+}
+
+void setColEight()
+{
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOB, COL_8_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, COL_9_Pin|COL_4_Pin|COL_3_Pin|COL_2_Pin|COL_1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(COL_5_GPIO_Port, COL_5_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, COL_7_Pin|COL_6_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, COL_12_Pin|COL_11_Pin|COL_10_Pin, GPIO_PIN_RESET);
+}
+
+void setColNine()
+{
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOC, COL_9_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, COL_3_Pin|COL_4_Pin|COL_1_Pin|COL_2_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(COL_5_GPIO_Port, COL_5_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, COL_7_Pin|COL_6_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, COL_8_Pin|COL_12_Pin|COL_11_Pin|COL_10_Pin, GPIO_PIN_RESET);
+}
+
+void setColTen()
+{
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOB, COL_10_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, COL_9_Pin|COL_4_Pin|COL_3_Pin|COL_2_Pin|COL_1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(COL_5_GPIO_Port, COL_5_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, COL_7_Pin|COL_6_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, COL_12_Pin|COL_11_Pin|COL_8_Pin, GPIO_PIN_RESET);
+}
+
+void setColEleven()
+{
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOB, COL_11_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, COL_9_Pin|COL_4_Pin|COL_3_Pin|COL_2_Pin|COL_1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(COL_5_GPIO_Port, COL_5_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, COL_7_Pin|COL_6_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, COL_12_Pin|COL_8_Pin|COL_10_Pin, GPIO_PIN_RESET);
+}
+
+void setColTwelve()
+{
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOB, COL_12_Pin, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOC, COL_9_Pin|COL_4_Pin|COL_3_Pin|COL_2_Pin|COL_1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(COL_5_GPIO_Port, COL_5_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOA, COL_7_Pin|COL_6_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(GPIOB, COL_8_Pin|COL_11_Pin|COL_10_Pin, GPIO_PIN_RESET);
+}
+
+void setAllCols()
+{
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOC, COL_9_Pin|COL_4_Pin|COL_3_Pin|COL_2_Pin
+	                        |COL_1_Pin, GPIO_PIN_SET);
+
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(COL_5_GPIO_Port, COL_5_Pin, GPIO_PIN_SET);
+
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOA, COL_7_Pin|COL_6_Pin, GPIO_PIN_SET);
+
+	/*Configure GPIO pin Output Level */
+	HAL_GPIO_WritePin(GPIOB, COL_8_Pin|COL_12_Pin|COL_11_Pin|COL_10_Pin, GPIO_PIN_SET);
+}
+
+uint8_t readRow(uint8_t row)
+{
+	uint8_t reading;
+	switch(row)
+	{
+		case 1:
+			reading = HAL_GPIO_ReadPin(GPIOB, ROW_1_Pin);
+			break;
+		case 2:
+			reading = HAL_GPIO_ReadPin(GPIOB, ROW_2_Pin);
+			break;
+		default:
+			reading = 0;
+	}
+	return reading;
 }
 /* USER CODE END 4 */
 
